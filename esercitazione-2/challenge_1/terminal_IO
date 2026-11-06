@@ -1,0 +1,8 @@
+anchor finding:
+❯ tshark -r capture-7.pcap -Y 'http.request.method=="POST" && http.request.uri contains "/admin/login"' -T fields -e tcp.stream
+  161
+
+extracting time-tsval couples from the anchor:
+❯ tshark -r capture-7.pcap -Y 'tcp.stream==161 && tcp.options.timestamp.tsval && ip.src==198.51.100.7' -T fields -e frame.time_relative -e tcp .options.timestamp.tsval | head
+  1234.392708000 809589394 1234.431179000 809589403 1234.431279000 809589403 1234.476607000 809589415 1234.478255000 809589415
+  
