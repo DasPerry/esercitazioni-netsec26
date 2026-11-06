@@ -2,7 +2,64 @@ anchor finding:
 ❯ tshark -r capture-7.pcap -Y 'http.request.method=="POST" && http.request.uri contains "/admin/login"' -T fields -e tcp.stream
   161
 
-extracting time-tsval couples from the anchor:
-❯ tshark -r capture-7.pcap -Y 'tcp.stream==161 && tcp.options.timestamp.tsval && ip.src==198.51.100.7' -T fields -e frame.time_relative -e tcp .options.timestamp.tsval | head
-  1234.392708000 809589394 1234.431179000 809589403 1234.431279000 809589403 1234.476607000 809589415 1234.478255000 809589415
-  
+
+script 1 output:
+
+❯ python codice_python.py
+gruppo provvisorio: 24 stream
+hz reale ~ 249.9900
+         0.0  stream 197
+         0.0  stream 222
+         0.0  stream 161
+         0.0  stream 37
+         0.1  stream 29
+         0.1  stream 88
+         0.1  stream 137
+         0.1  stream 140
+         0.1  stream 35
+         0.1  stream 214
+         0.1  stream 174
+         0.1  stream 7
+         0.1  stream 177
+         0.1  stream 122
+         0.1  stream 84
+         0.1  stream 181
+         0.1  stream 48
+         0.2  stream 173
+         0.2  stream 28
+         0.2  stream 170
+         0.2  stream 198
+         0.2  stream 69
+         0.2  stream 121
+         0.3  stream 112
+    116679.6  stream 2
+    116679.7  stream 4
+    116679.7  stream 0
+    116681.0  stream 24
+    116681.7  stream 36
+    116683.0  stream 58
+    116683.4  stream 56
+    116683.9  stream 67
+    116684.1  stream 76
+    116685.2  stream 96
+    116685.7  stream 105
+    116686.2  stream 115
+    116687.4  stream 131
+    116687.9  stream 135
+    116688.8  stream 155
+    116689.3  stream 163
+
+stream finali: 24
+7 28 29 35 37 48 69 84 88 112 121 122 137 140 161 170 173 174 177 181 197 198 214 222
+
+script 2 output:
+❯ python codice_python2.py
+1 {'7f2e83'}
+2 {'ac2cc5'}
+3 {'da1d16'}
+4 {'cc576d'}
+5 {'ae4f66'}
+6 {'288224'}
+7 {'4adba8'}
+8 {'d2fc38'}
+48 netsec{7f2e83ac2cc5da1d16cc576dae4f662882244adba8d2fc38}
